@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using TodoAPI.Entities;
@@ -29,7 +30,9 @@ namespace TodoAPI.Controllers
         public IActionResult Create([FromBody]TodoListModel model)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var userProject = user.UserProjects.Where(up => up.ProjectId == model.ProjectId).FirstOrDefault(null);
+            var userProject = _context.UserProjects
+                .Include(up => up.Project)
+                .SingleOrDefault(up => up.ProjectId == model.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
                 return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
@@ -48,12 +51,15 @@ namespace TodoAPI.Controllers
         public IActionResult Get(int id)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var todoList = _context.TodoLists.Where(tl => tl.Id == id).FirstOrDefault(null);
+            var todoList = _context.TodoLists
+                .Include(tl => tl.TodoItems)
+                .SingleOrDefault(tl => tl.Id == id);
 
             if (todoList == null)
                 return NotFound(new { message = "This list does not exist." });
 
-            var userProject = user.UserProjects.Where(up => up.ProjectId == todoList.ProjectId).FirstOrDefault(null);
+            var userProject = _context.UserProjects
+                .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
                 return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
@@ -65,12 +71,14 @@ namespace TodoAPI.Controllers
         public IActionResult Update(int id, [FromBody]TodoListUpdateModel model)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var todoList = _context.TodoLists.Where(tl => tl.Id == id).FirstOrDefault(null);
+            var todoList = _context.TodoLists
+                .SingleOrDefault(tl => tl.Id == id);
 
             if (todoList == null)
                 return NotFound(new { message = "This list does not exist." });
 
-            var userProject = user.UserProjects.Where(up => up.ProjectId == todoList.ProjectId).FirstOrDefault(null);
+            var userProject = _context.UserProjects
+                .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
                 return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
@@ -85,12 +93,14 @@ namespace TodoAPI.Controllers
         public IActionResult Delete(int id)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var todoList = _context.TodoLists.Where(tl => tl.Id == id).FirstOrDefault(null);
+            var todoList = _context.TodoLists
+                .SingleOrDefault(tl => tl.Id == id);
 
             if (todoList == null)
                 return NotFound(new { message = "This list does not exist." });
 
-            var userProject = user.UserProjects.Where(up => up.ProjectId == todoList.ProjectId).FirstOrDefault(null);
+            var userProject = _context.UserProjects
+                .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
                 return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
