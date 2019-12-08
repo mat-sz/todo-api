@@ -52,9 +52,16 @@ namespace TodoAPI.Controllers
             var success = _authService.CreateUser(model.Username, model.Password);
 
             if (!success)
-                return BadRequest(new { message = "An user with this username already exists." });
+                return BadRequest(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "An user with this username already exists."
+                    });
 
-            return Ok(new { success = true });
+            return Ok(new GenericResponseModel
+                {
+                    Success = true
+                });
         }
 
         [HttpPost("password")]
@@ -63,14 +70,25 @@ namespace TodoAPI.Controllers
             var user = _authService.GetUserFromIdentity(this.User.Identity);
 
             if (user == null)
-                return BadRequest(new { message = "Malformed token." });
+                return BadRequest(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "Malformed token."
+                    });
 
             var success = _authService.UpdatePassword(user, model.OldPassword, model.Password);
 
             if (!success)
-                return BadRequest(new { message = "The provided password is not correct." });
+                return BadRequest(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "The provided password is not correct."
+                    });
 
-            return Ok(new { success = true });
+            return Ok(new GenericResponseModel
+                {
+                    Success = true
+                });
         }
     }
 }

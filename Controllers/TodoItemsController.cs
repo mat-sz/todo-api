@@ -35,14 +35,22 @@ namespace TodoAPI.Controllers
                 .SingleOrDefault(tl => tl.Id == model.TodoListId);
 
             if (todoList == null)
-                return NotFound(new { message = "This list does not exist." });
+                return NotFound(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "This item does not exist."
+                    });
 
             var userProject = _context.UserProjects
                 .Include(up => up.Project)
                 .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
-                return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
+                return BadRequest(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
+                    });
 
             var item = new TodoItem{
                 Name = model.Name,
@@ -52,7 +60,10 @@ namespace TodoAPI.Controllers
             todoList.TodoItems.Add(item);
             _context.SaveChanges();
 
-            return Ok(new { success = true });
+            return Ok(new GenericResponseModel
+                {
+                    Success = true
+                });
         }
 
         [HttpGet("/{id}")]
@@ -66,13 +77,21 @@ namespace TodoAPI.Controllers
                 .SingleOrDefault(ti => ti.Id == id);
 
             if (todoItem == null)
-                return NotFound(new { message = "This item does not exist." });
+                return NotFound(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "This item does not exist."
+                    });
 
             var userProject = _context.UserProjects
                 .SingleOrDefault(up => up.ProjectId == todoItem.TodoList.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
-                return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
+                return BadRequest(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
+                    });
 
             return Ok(todoItem);
         }
@@ -88,19 +107,30 @@ namespace TodoAPI.Controllers
                 .SingleOrDefault(ti => ti.Id == id);
 
             if (todoItem == null)
-                return NotFound(new { message = "This item does not exist." });
+                return NotFound(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "This item does not exist."
+                    });
 
             var userProject = _context.UserProjects
                 .SingleOrDefault(up => up.ProjectId == todoItem.TodoList.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
-                return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
+                return BadRequest(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
+                    });
 
             todoItem.Name = model.Name;
             todoItem.Done = model.Done;
             _context.SaveChanges();
 
-            return Ok(new { success = true });
+            return Ok(new GenericResponseModel
+                {
+                    Success = true
+                });
         }
 
         [HttpDelete("/{id}")]
@@ -114,18 +144,29 @@ namespace TodoAPI.Controllers
                 .SingleOrDefault(ti => ti.Id == id);
 
             if (todoItem == null)
-                return NotFound(new { message = "This item does not exist." });
+                return NotFound(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "This item does not exist."
+                    });
 
             var userProject = _context.UserProjects
                 .SingleOrDefault(up => up.ProjectId == todoItem.TodoList.ProjectId && up.UserId == user.Id);
 
             if (userProject == null)
-                return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
+                return BadRequest(new GenericResponseModel
+                    {
+                        Success = false,
+                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
+                    });
 
             _context.Remove(todoItem);
             _context.SaveChanges();
 
-            return Ok(new { success = true });
+            return Ok(new GenericResponseModel
+                {
+                    Success = true
+                });
         }
     }
 }
