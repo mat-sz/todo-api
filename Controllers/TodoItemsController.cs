@@ -12,13 +12,13 @@ namespace TodoAPI.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class TodoItemController : ControllerBase
+    public class TodoItemsController : ControllerBase
     {
-        private readonly ILogger<TodoItemController> _logger;
+        private readonly ILogger<TodoItemsController> _logger;
         private readonly TodoContext _context;
         private readonly IAuthService _authService;
 
-        public TodoItemController(ILogger<TodoItemController> logger, TodoContext context, IAuthService authService)
+        public TodoItemsController(ILogger<TodoItemsController> logger, TodoContext context, IAuthService authService)
         {
             _logger = logger;
             _context = context;

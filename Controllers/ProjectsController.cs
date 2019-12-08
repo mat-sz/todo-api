@@ -13,13 +13,13 @@ namespace TodoAPI.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class ProjectController : ControllerBase
+    public class ProjectsController : ControllerBase
     {
-        private readonly ILogger<ProjectController> _logger;
+        private readonly ILogger<ProjectsController> _logger;
         private readonly TodoContext _context;
         private readonly IAuthService _authService;
 
-        public ProjectController(ILogger<ProjectController> logger, TodoContext context, IAuthService authService)
+        public ProjectsController(ILogger<ProjectsController> logger, TodoContext context, IAuthService authService)
         {
             _logger = logger;
             _context = context;
