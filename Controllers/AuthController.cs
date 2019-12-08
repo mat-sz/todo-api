@@ -14,19 +14,19 @@ namespace TodoAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
-        private readonly IAuthService _authenticationService;
+        private readonly IAuthService _authService;
 
-        public AuthController(ILogger<AuthController> logger, IAuthService authenticationService)
+        public AuthController(ILogger<AuthController> logger, IAuthService authService)
         {
             _logger = logger;
-            _authenticationService = authenticationService;
+            _authService = authService;
         }
 
         [AllowAnonymous]
         [HttpPost]
         public IActionResult Authenticate([FromBody]AuthenticationRequestModel model)
         {
-            var responseModel = _authenticationService.Authenticate(model.Username, model.Password);
+            var responseModel = _authService.Authenticate(model.Username, model.Password);
 
             if (!responseModel.Success)
                 return BadRequest(responseModel);
@@ -45,7 +45,7 @@ namespace TodoAPI.Controllers
         [HttpPost("signup")]
         public IActionResult Signup([FromBody]SignupRequestModel model)
         {
-            var responseModel = _authenticationService.CreateUser(model.Username, model.Password);
+            var responseModel = _authService.CreateUser(model.Username, model.Password);
 
             if (!responseModel.Success)
                 return BadRequest(responseModel);
@@ -56,13 +56,12 @@ namespace TodoAPI.Controllers
         [HttpPost("password")]
         public IActionResult Password([FromBody]UpdatePasswordRequestModel model)
         {
-            var claimsIdentity = this.User.Identity as ClaimsIdentity;
-            int userId;
+            var user = _authService.GetUserFromIdentity(this.User.Identity);
 
-            if (!Int32.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out userId))
+            if (user == null)
                 return BadRequest(new { message = "Malformed token." });
 
-            var success = _authenticationService.UpdatePassword(userId, model.OldPassword, model.Password);
+            var success = _authService.UpdatePassword(user, model.OldPassword, model.Password);
 
             if (!success)
                 return BadRequest(new { message = "The provided password is not correct." });

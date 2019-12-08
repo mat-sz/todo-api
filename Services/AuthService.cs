@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +17,8 @@ namespace TodoAPI.Services
     {
         AuthenticationResponseModel Authenticate(string username, string password);
         SignupResponseModel CreateUser(string username, string password);
-        bool UpdatePassword(int userId, string oldPassword, string password);
+        bool UpdatePassword(User user, string oldPassword, string password);
+        User GetUserFromIdentity(IIdentity identity);
     }
 
     public class AuthService : IAuthService
@@ -86,13 +88,8 @@ namespace TodoAPI.Services
             };
         }
 
-        public bool UpdatePassword(int userId, string oldPassword, string password)
+        public bool UpdatePassword(User user, string oldPassword, string password)
         {
-            var user = _context.Users.SingleOrDefault(x => x.Id == userId);
-
-            if (user == null)
-                return false;
-            
             if (_passwordHasher.VerifyHashedPassword(user, user.Password, oldPassword) == PasswordVerificationResult.Failed)
                 return false;
 
@@ -100,6 +97,17 @@ namespace TodoAPI.Services
             _context.SaveChanges();
 
             return true;
+        }
+
+        public User GetUserFromIdentity(IIdentity identity)
+        {
+            var claimsIdentity = identity as ClaimsIdentity;
+            int userId;
+
+            if (!Int32.TryParse(claimsIdentity.FindFirst(ClaimTypes.Name)?.Value, out userId))
+                return null;
+
+            return _context.Users.SingleOrDefault(x => x.Id == userId);
         }
     }
 }
