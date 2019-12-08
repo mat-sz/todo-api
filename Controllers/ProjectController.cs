@@ -3,6 +3,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
+using TodoAPI.Entities;
+using TodoAPI.Models;
 using TodoAPI.Services;
 
 namespace TodoAPI.Controllers
@@ -21,6 +23,75 @@ namespace TodoAPI.Controllers
             _logger = logger;
             _context = context;
             _authService = authService;
+        }
+
+        [HttpGet]
+        public IActionResult Index()
+        {
+            var user = _authService.GetUserFromIdentity(this.User.Identity);
+            var projects = _context.UserProjects.Where(up => up.UserId == user.Id);
+            
+            return Ok(projects.Select(up => up.Project));
+        }
+
+        [HttpPost]
+        public IActionResult Create([FromBody]ProjectModel model)
+        {
+            var user = _authService.GetUserFromIdentity(this.User.Identity);
+            var project = new Project{
+                Name = model.Name
+            };
+            var userProject = new UserProject{
+                User = user
+            };
+
+            project.UserProjects.Add(userProject);
+            _context.Add(project);
+            _context.SaveChanges();
+
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("/{id}")]
+        public IActionResult Get(int id)
+        {
+            var user = _authService.GetUserFromIdentity(this.User.Identity);
+            var userProject = user.UserProjects.Where(up => up.ProjectId == id).FirstOrDefault(null);
+
+            if (userProject == null)
+                return BadRequest(new { message = "The project doesn't exists or the current user doesn't have permission to access this project." });
+
+            return Ok(userProject.Project);
+        }
+
+        [HttpPost("/{id}")]
+        public IActionResult Update(int id, [FromBody]ProjectModel model)
+        {
+            var user = _authService.GetUserFromIdentity(this.User.Identity);
+            var userProject = user.UserProjects.Where(up => up.ProjectId == id).FirstOrDefault(null);
+
+            if (userProject == null)
+                return BadRequest(new { message = "The project doesn't exists or the current user doesn't have permission to access this project." });
+
+            userProject.Project.Name = model.Name;
+            _context.SaveChanges();
+
+            return Ok(new { success = true });
+        }
+
+        [HttpDelete("/{id}")]
+        public IActionResult Delete(int id)
+        {
+            var user = _authService.GetUserFromIdentity(this.User.Identity);
+            var userProject = user.UserProjects.Where(up => up.ProjectId == id).FirstOrDefault(null);
+
+            if (userProject == null)
+                return BadRequest(new { message = "The project doesn't exists or the current user doesn't have permission to access this project." });
+
+            _context.Remove(userProject.Project);
+            _context.SaveChanges();
+
+            return Ok(new { success = true });
         }
     }
 }
