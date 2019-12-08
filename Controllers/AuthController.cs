@@ -38,7 +38,11 @@ namespace TodoAPI.Controllers
         [HttpGet]
         public IActionResult Status()
         {
-            return Ok(this.User);
+            if (!this.User.Identity.IsAuthenticated)
+                return Ok(null);
+            
+            var user = _authService.GetUserFromIdentity(this.User.Identity);
+            return Ok(user);
         }
 
         [AllowAnonymous]
