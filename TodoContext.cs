@@ -11,9 +11,10 @@ namespace TodoAPI
         public DbSet<UserProject> UserProjects { get; set; }
         public DbSet<TodoList> TodoLists { get; set; }
         public DbSet<TodoItem> TodoItems { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite("Data Source=app.db");
+        
+        public TodoContext(DbContextOptions<TodoContext> options) : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -53,6 +54,9 @@ namespace TodoAPI
 
             services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddDbContext<TodoContext>(options =>
+                options.UseSqlite("Data Source=" + appSettings.DatabaseFile)
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
