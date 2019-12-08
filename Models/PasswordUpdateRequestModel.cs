@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TodoAPI.Models
 {
-    public class UpdatePasswordRequestModel
+    public class PasswordUpdateRequestModel
     {
         [Required]
         public string OldPassword { get; set; }

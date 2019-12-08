@@ -16,7 +16,7 @@ namespace TodoAPI.Services
     public interface IAuthService
     {
         AuthenticationResponseModel Authenticate(string username, string password);
-        SignupResponseModel CreateUser(string username, string password);
+        bool CreateUser(string username, string password);
         bool UpdatePassword(User user, string oldPassword, string password);
         User GetUserFromIdentity(IIdentity identity);
     }
@@ -66,12 +66,12 @@ namespace TodoAPI.Services
             };
         }
 
-        public SignupResponseModel CreateUser(string username, string password)
+        public bool CreateUser(string username, string password)
         {
             var user = _context.Users.SingleOrDefault(x => x.Username == username);
 
             if (user != null)
-                return new SignupResponseModel{ Success = false };
+                return false;
 
             user = new User{
                 Username = username,
@@ -82,10 +82,7 @@ namespace TodoAPI.Services
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            return new SignupResponseModel
-            {
-                Success = true,
-            };
+            return true;
         }
 
         public bool UpdatePassword(User user, string oldPassword, string password)

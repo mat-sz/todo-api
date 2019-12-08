@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TodoAPI.Models
 {
-    public class SignupRequestModel
+    public class SignupModel
     {
         [Required]
         public string Username { get; set; }

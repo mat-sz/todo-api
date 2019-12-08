@@ -59,7 +59,7 @@ namespace TodoAPI.Controllers
             var userProject = user.UserProjects.Where(up => up.ProjectId == id).FirstOrDefault(null);
 
             if (userProject == null)
-                return BadRequest(new { message = "The project doesn't exists or the current user doesn't have permission to access this project." });
+                return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
 
             return Ok(userProject.Project);
         }
@@ -71,7 +71,7 @@ namespace TodoAPI.Controllers
             var userProject = user.UserProjects.Where(up => up.ProjectId == id).FirstOrDefault(null);
 
             if (userProject == null)
-                return BadRequest(new { message = "The project doesn't exists or the current user doesn't have permission to access this project." });
+                return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
 
             userProject.Project.Name = model.Name;
             _context.SaveChanges();
@@ -86,7 +86,7 @@ namespace TodoAPI.Controllers
             var userProject = user.UserProjects.Where(up => up.ProjectId == id).FirstOrDefault(null);
 
             if (userProject == null)
-                return BadRequest(new { message = "The project doesn't exists or the current user doesn't have permission to access this project." });
+                return BadRequest(new { message = "The project doesn't exist or the current user doesn't have permission to access this project." });
 
             _context.Remove(userProject.Project);
             _context.SaveChanges();

@@ -43,18 +43,18 @@ namespace TodoAPI.Controllers
 
         [AllowAnonymous]
         [HttpPost("signup")]
-        public IActionResult Signup([FromBody]SignupRequestModel model)
+        public IActionResult Signup([FromBody]SignupModel model)
         {
-            var responseModel = _authService.CreateUser(model.Username, model.Password);
+            var success = _authService.CreateUser(model.Username, model.Password);
 
-            if (!responseModel.Success)
-                return BadRequest(responseModel);
+            if (!success)
+                return BadRequest(new { message = "An user with this username already exists." });
 
-            return Ok(responseModel);
+            return Ok(new { success = true });
         }
 
         [HttpPost("password")]
-        public IActionResult Password([FromBody]UpdatePasswordRequestModel model)
+        public IActionResult Password([FromBody]PasswordUpdateRequestModel model)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
 
