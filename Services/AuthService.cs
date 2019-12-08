@@ -1,0 +1,112 @@
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
+using TodoAPI.Entities;
+using TodoAPI.Models;
+
+namespace TodoAPI.Services
+{
+    public interface IAuthService
+    {
+        AuthenticationResponseModel Authenticate(string username, string password);
+        SignupResponseModel CreateUser(string username, string password);
+        bool UpdatePassword(int userId, string oldPassword, string password);
+    }
+
+    public class AuthService : IAuthService
+    {
+        private readonly AppSettings _appSettings;
+        private readonly IPasswordHasher<User> _passwordHasher;
+
+        public AuthService(IOptions<AppSettings> appSettings, IPasswordHasher<User> passwordHasher)
+        {
+            _appSettings = appSettings.Value;
+            _passwordHasher = passwordHasher;
+        }
+
+        public AuthenticationResponseModel Authenticate(string username, string password)
+        {
+            using (var db = new TodoContext())
+            {
+                var user = db.Users.SingleOrDefault(x => x.Username == username);
+
+                if (user == null)
+                    return new AuthenticationResponseModel{ Success = false };
+                
+                if (_passwordHasher.VerifyHashedPassword(user, user.Password, password) == PasswordVerificationResult.Failed)
+                    return new AuthenticationResponseModel{ Success = false };
+
+                // Authentication successful.
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[] 
+                    {
+                        new Claim(ClaimTypes.Name, user.Id.ToString())
+                    }),
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                return new AuthenticationResponseModel
+                {
+                    Success = true,
+                    Token = tokenHandler.WriteToken(token)
+                };
+            }
+        }
+
+        public SignupResponseModel CreateUser(string username, string password)
+        {
+            using (var db = new TodoContext())
+            {
+                var user = db.Users.SingleOrDefault(x => x.Username == username);
+
+                if (user != null)
+                    return new SignupResponseModel{ Success = false };
+
+                user = new User{
+                    Username = username,
+                };
+
+                user.Password = _passwordHasher.HashPassword(user, password);
+                
+                db.Users.Add(user);
+                db.SaveChanges();
+
+                return new SignupResponseModel
+                {
+                    Success = true,
+                };
+            }
+        }
+
+        public bool UpdatePassword(int userId, string oldPassword, string password)
+        {
+            using (var db = new TodoContext())
+            {
+                var user = db.Users.SingleOrDefault(x => x.Id == userId);
+
+                if (user == null)
+                    return false;
+                
+                if (_passwordHasher.VerifyHashedPassword(user, user.Password, oldPassword) == PasswordVerificationResult.Failed)
+                    return false;
+
+                user.Password = _passwordHasher.HashPassword(user, password);
+                db.SaveChanges();
+
+                return true;
+            }
+        }
+    }
+}
