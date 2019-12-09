@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TodoAPI.Entities;
 
@@ -14,6 +15,34 @@ namespace TodoAPI
         
         public TodoContext(DbContextOptions<TodoContext> options) : base(options)
         {
+        }
+
+        public override int SaveChanges()
+        {
+            var newEntities = this.ChangeTracker.Entries()
+                .Where(x => x.State == EntityState.Added &&
+                    x.Entity != null &&
+                    x.Entity as ITimestamped != null)
+                .Select(x => x.Entity as ITimestamped);
+
+            var modifiedEntities = this.ChangeTracker.Entries() 
+                .Where(x => x.State == EntityState.Modified &&
+                    x.Entity != null &&
+                    x.Entity as ITimestamped != null)
+                .Select(x => x.Entity as ITimestamped);
+
+            foreach (var newEntity in newEntities)
+            {
+                newEntity.CreatedAt = DateTime.UtcNow;
+                newEntity.UpdatedAt = DateTime.UtcNow;
+            }
+
+            foreach (var modifiedEntity in modifiedEntities)
+            {
+                modifiedEntity.UpdatedAt = DateTime.UtcNow;
+            }
+
+            return base.SaveChanges();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
