@@ -66,6 +66,7 @@ namespace TodoAPI.Controllers
             var userProject = _context.UserProjects
                 .Include(up => up.Project)
                 .ThenInclude(p => p.TodoLists)
+                .ThenInclude(tl => tl.TodoItems)
                 .SingleOrDefault(up => up.ProjectId == id && up.UserId == user.Id);
 
             if (userProject == null)

@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace TodoAPI.Entities
 {
@@ -8,6 +9,8 @@ namespace TodoAPI.Entities
         public string Name { get; set; }
         public bool Done { get; set; }
         public int TodoListId { get; set; }
+        
+        [JsonIgnore]
         public TodoList TodoList { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
