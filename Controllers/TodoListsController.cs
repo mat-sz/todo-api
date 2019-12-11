@@ -54,7 +54,7 @@ namespace TodoAPI.Controllers
                 });
         }
 
-        [HttpGet("/{id}")]
+        [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
@@ -85,7 +85,7 @@ namespace TodoAPI.Controllers
                 });
         }
 
-        [HttpPost("/{id}")]
+        [HttpPost("{id}")]
         public IActionResult Update(int id, [FromBody]TodoListUpdateModel model)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
@@ -118,7 +118,7 @@ namespace TodoAPI.Controllers
                 });
         }
 
-        [HttpDelete("/{id}")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);

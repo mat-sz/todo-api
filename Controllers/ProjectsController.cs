@@ -79,7 +79,7 @@ namespace TodoAPI.Controllers
             return Ok(userProject.Project);
         }
 
-        [HttpPost("/{id}")]
+        [HttpPost("{id}")]
         public IActionResult Update(int id, [FromBody]ProjectModel model)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
@@ -103,7 +103,7 @@ namespace TodoAPI.Controllers
                 });
         }
 
-        [HttpDelete("/{id}")]
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
