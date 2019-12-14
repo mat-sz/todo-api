@@ -79,10 +79,7 @@ namespace TodoAPI.Controllers
                         Message = "The project doesn't exist or the current user doesn't have permission to access this project."
                     });
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(todoList);
         }
 
         [HttpPost("{id}")]
