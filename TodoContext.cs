@@ -12,6 +12,8 @@ namespace TodoAPI
         public DbSet<UserProject> UserProjects { get; set; }
         public DbSet<TodoList> TodoLists { get; set; }
         public DbSet<TodoItem> TodoItems { get; set; }
+        public DbSet<Label> Labels { get; set; }
+        public DbSet<TodoItemLabel> TodoItemLabels { get; set; }
         
         public TodoContext(DbContextOptions<TodoContext> options) : base(options)
         {
@@ -59,6 +61,19 @@ namespace TodoAPI
                 .HasOne(up => up.Project)
                 .WithMany(p => p.UserProjects)
                 .HasForeignKey(up => up.ProjectId);
+
+            modelBuilder.Entity<TodoItemLabel>()
+                .HasKey(til => new { til.TodoItemId, til.LabelId });  
+
+            modelBuilder.Entity<TodoItemLabel>()
+                .HasOne(til => til.TodoItem)
+                .WithMany(ti => ti.TodoItemLabels)
+                .HasForeignKey(til => til.TodoItemId);  
+
+            modelBuilder.Entity<TodoItemLabel>()
+                .HasOne(til => til.Label)
+                .WithMany(l => l.TodoItemLabels)
+                .HasForeignKey(til => til.LabelId);
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
