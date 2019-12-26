@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using TodoAPI.Entities;
+using TodoAPI.Filters;
 using TodoAPI.Models;
 using TodoAPI.Services;
 
@@ -60,41 +61,19 @@ namespace TodoAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [TypeFilter(typeof(ProjectsActionFilter))]
         public IActionResult Get(int id)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var userProject = _context.UserProjects
-                .Include(up => up.Project)
-                .ThenInclude(p => p.TodoLists)
-                .ThenInclude(tl => tl.TodoItems)
-                .SingleOrDefault(up => up.ProjectId == id && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
-            return Ok(userProject.Project);
+            Project project = (Project)HttpContext.Items["project"];
+            return Ok(project);
         }
 
         [HttpPost("{id}")]
+        [TypeFilter(typeof(ProjectsActionFilter))]
         public IActionResult Update(int id, [FromBody]ProjectModel model)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var userProject = _context.UserProjects
-                .Include(up => up.Project)
-                .SingleOrDefault(up => up.ProjectId == id && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
-            userProject.Project.Name = model.Name;
+            Project project = (Project)HttpContext.Items["project"];
+            project.Name = model.Name;
             _context.SaveChanges();
 
             return Ok(new GenericResponseModel
@@ -104,21 +83,11 @@ namespace TodoAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [TypeFilter(typeof(ProjectsActionFilter))]
         public IActionResult Delete(int id)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var userProject = _context.UserProjects
-                .Include(up => up.Project)
-                .SingleOrDefault(up => up.ProjectId == id && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
-            _context.Remove(userProject.Project);
+            Project project = (Project)HttpContext.Items["project"];
+            _context.Remove(project);
             _context.SaveChanges();
 
             return Ok(new GenericResponseModel
