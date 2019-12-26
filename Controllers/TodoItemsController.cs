@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using TodoAPI.Entities;
+using TodoAPI.Filters;
 using TodoAPI.Models;
 using TodoAPI.Services;
 
@@ -67,62 +68,18 @@ namespace TodoAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [TypeFilter(typeof(TodoItemsActionFilter))]
         public IActionResult Get(int id)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            
-            var todoItem = _context.TodoItems
-                .Include(ti => ti.TodoList)
-                .ThenInclude(tl => tl.Project)
-                .SingleOrDefault(ti => ti.Id == id);
-
-            if (todoItem == null)
-                return NotFound(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "This item does not exist."
-                    });
-
-            var userProject = _context.UserProjects
-                .SingleOrDefault(up => up.ProjectId == todoItem.TodoList.ProjectId && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
+            TodoItem todoItem = (TodoItem)HttpContext.Items["todoItem"];
             return Ok(todoItem);
         }
 
         [HttpPost("{id}")]
+        [TypeFilter(typeof(TodoItemsActionFilter))]
         public IActionResult Update(int id, [FromBody]TodoItemUpdateModel model)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            
-            var todoItem = _context.TodoItems
-                .Include(ti => ti.TodoList)
-                .ThenInclude(tl => tl.Project)
-                .SingleOrDefault(ti => ti.Id == id);
-
-            if (todoItem == null)
-                return NotFound(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "This item does not exist."
-                    });
-
-            var userProject = _context.UserProjects
-                .SingleOrDefault(up => up.ProjectId == todoItem.TodoList.ProjectId && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
+            TodoItem todoItem = (TodoItem)HttpContext.Items["todoItem"];
             todoItem.Name = model.Name;
             todoItem.Done = model.Done;
             _context.SaveChanges();
@@ -134,32 +91,10 @@ namespace TodoAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [TypeFilter(typeof(TodoItemsActionFilter))]
         public IActionResult Delete(int id)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            
-            var todoItem = _context.TodoItems
-                .Include(ti => ti.TodoList)
-                .ThenInclude(tl => tl.Project)
-                .SingleOrDefault(ti => ti.Id == id);
-
-            if (todoItem == null)
-                return NotFound(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "This item does not exist."
-                    });
-
-            var userProject = _context.UserProjects
-                .SingleOrDefault(up => up.ProjectId == todoItem.TodoList.ProjectId && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
+            TodoItem todoItem = (TodoItem)HttpContext.Items["todoItem"];
             _context.Remove(todoItem);
             _context.SaveChanges();
 
