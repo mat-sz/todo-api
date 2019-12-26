@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authorization;
 using TodoAPI.Entities;
+using TodoAPI.Filters;
 using TodoAPI.Models;
 using TodoAPI.Services;
 
@@ -55,57 +56,18 @@ namespace TodoAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [TypeFilter(typeof(TodoListsActionFilter))]
         public IActionResult Get(int id)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var todoList = _context.TodoLists
-                .Include(tl => tl.TodoItems)
-                .SingleOrDefault(tl => tl.Id == id);
-
-            if (todoList == null)
-                return NotFound(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "This list does not exist."
-                    });
-
-            var userProject = _context.UserProjects
-                .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
+            TodoList todoList = (TodoList)HttpContext.Items["todoList"];
             return Ok(todoList);
         }
 
         [HttpPost("{id}")]
+        [TypeFilter(typeof(TodoListsActionFilter))]
         public IActionResult Update(int id, [FromBody]TodoListUpdateModel model)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var todoList = _context.TodoLists
-                .SingleOrDefault(tl => tl.Id == id);
-
-            if (todoList == null)
-                return NotFound(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "This list does not exist."
-                    });
-
-            var userProject = _context.UserProjects
-                .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
+            TodoList todoList = (TodoList)HttpContext.Items["todoList"];
             todoList.Name = model.Name;
             _context.SaveChanges();
 
@@ -116,29 +78,10 @@ namespace TodoAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [TypeFilter(typeof(TodoListsActionFilter))]
         public IActionResult Delete(int id)
         {
-            var user = _authService.GetUserFromIdentity(this.User.Identity);
-            var todoList = _context.TodoLists
-                .SingleOrDefault(tl => tl.Id == id);
-
-            if (todoList == null)
-                return NotFound(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "This list does not exist."
-                    });
-
-            var userProject = _context.UserProjects
-                .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
-
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
-
+            TodoList todoList = (TodoList)HttpContext.Items["todoList"];
             _context.Remove(todoList);
             _context.SaveChanges();
 
