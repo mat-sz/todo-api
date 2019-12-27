@@ -35,12 +35,14 @@ namespace TodoAPI.Controllers
                 .Include(up => up.Project)
                 .SingleOrDefault(up => up.ProjectId == model.ProjectId && up.UserId == user.Id);
 
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
+            if (userProject == null) {
+                return BadRequest(new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
                         Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
+                    }
+                });
+            }
 
             var list = new TodoList{
                 Name = model.Name
@@ -49,10 +51,9 @@ namespace TodoAPI.Controllers
             userProject.Project.TodoLists.Add(list);
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
 
         [HttpGet("{id}")]
@@ -60,7 +61,10 @@ namespace TodoAPI.Controllers
         public IActionResult Get(int id)
         {
             TodoList todoList = (TodoList)HttpContext.Items["todoList"];
-            return Ok(todoList);
+            return Ok(new ResponseModel {
+                Success = true,
+                Data = todoList
+            });
         }
 
         [HttpPost("{id}")]
@@ -71,10 +75,9 @@ namespace TodoAPI.Controllers
             todoList.Name = model.Name;
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
 
         [HttpDelete("{id}")]
@@ -85,10 +88,9 @@ namespace TodoAPI.Controllers
             _context.Remove(todoList);
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
     }
 }

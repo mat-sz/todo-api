@@ -38,11 +38,18 @@ namespace TodoAPI.Controllers
         [HttpGet]
         public IActionResult Status()
         {
-            if (!this.User.Identity.IsAuthenticated)
-                return Ok(null);
+            if (!this.User.Identity.IsAuthenticated) {
+                return Ok(new ResponseModel {
+                    Success = true,
+                    Data = null
+                });
+            }
             
             var user = _authService.GetUserFromIdentity(this.User.Identity);
-            return Ok(user);
+            return Ok(new ResponseModel {
+                Success = true,
+                Data = user
+            });
         }
 
         [AllowAnonymous]
@@ -51,17 +58,18 @@ namespace TodoAPI.Controllers
         {
             var success = _authService.CreateUser(model.Username, model.Password);
 
-            if (!success)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
+            if (!success) {
+                return BadRequest(new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
                         Message = "An user with this username already exists."
-                    });
-
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
+                    }
                 });
+            }
+
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
 
         [HttpPost("password")]
@@ -69,26 +77,29 @@ namespace TodoAPI.Controllers
         {
             var user = _authService.GetUserFromIdentity(this.User.Identity);
 
-            if (user == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
+            if (user == null) {
+                return BadRequest(new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
                         Message = "Malformed token."
-                    });
+                    }
+                });
+            }
 
             var success = _authService.UpdatePassword(user, model.OldPassword, model.Password);
 
-            if (!success)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
+            if (!success) {
+                return BadRequest(new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
                         Message = "The provided password is not correct."
-                    });
-
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
+                    }
                 });
+            }
+
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
     }
 }

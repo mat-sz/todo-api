@@ -15,7 +15,7 @@ namespace TodoAPI.Services
 {
     public interface IAuthService
     {
-        AuthenticationResponseModel Authenticate(string username, string password);
+        ResponseModel Authenticate(string username, string password);
         bool CreateUser(string username, string password);
         bool UpdatePassword(User user, string oldPassword, string password);
         User GetUserFromIdentity(IIdentity identity);
@@ -34,15 +34,27 @@ namespace TodoAPI.Services
             _context = context;
         }
 
-        public AuthenticationResponseModel Authenticate(string username, string password)
+        public ResponseModel Authenticate(string username, string password)
         {
             var user = _context.Users.SingleOrDefault(x => x.Username == username);
 
-            if (user == null)
-                return new AuthenticationResponseModel{ Success = false };
+            if (user == null) {
+                return new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
+                        Message = "The username or password is incorrect."
+                    }
+                };
+            }
             
-            if (_passwordHasher.VerifyHashedPassword(user, user.Password, password) == PasswordVerificationResult.Failed)
-                return new AuthenticationResponseModel{ Success = false };
+            if (_passwordHasher.VerifyHashedPassword(user, user.Password, password) == PasswordVerificationResult.Failed) {
+                return new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
+                        Message = "The username or password is incorrect."
+                    }
+                };
+            }
 
             // Authentication successful.
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -59,10 +71,9 @@ namespace TodoAPI.Services
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return new AuthenticationResponseModel
-            {
+            return new ResponseModel {
                 Success = true,
-                Token = tokenHandler.WriteToken(token)
+                Data = tokenHandler.WriteToken(token)
             };
         }
 

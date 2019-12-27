@@ -36,7 +36,10 @@ namespace TodoAPI.Controllers
                 .ThenInclude(p => p.TodoLists)
                 .Where(up => up.UserId == user.Id);
             
-            return Ok(userProjects.Select(up => up.Project));
+            return Ok(new ResponseModel {
+                Success = true,
+                Data = userProjects.Select(up => up.Project)
+            });
         }
 
         [HttpPost]
@@ -54,10 +57,9 @@ namespace TodoAPI.Controllers
             _context.Add(project);
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
 
         [HttpGet("{id}")]
@@ -65,7 +67,10 @@ namespace TodoAPI.Controllers
         public IActionResult Get(int id)
         {
             Project project = (Project)HttpContext.Items["project"];
-            return Ok(project);
+            return Ok(new ResponseModel {
+                Success = true,
+                Data = project
+            });
         }
 
         [HttpPost("{id}")]
@@ -76,10 +81,9 @@ namespace TodoAPI.Controllers
             project.Name = model.Name;
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
 
         [HttpDelete("{id}")]
@@ -90,10 +94,9 @@ namespace TodoAPI.Controllers
             _context.Remove(project);
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
     }
 }

@@ -34,9 +34,11 @@ namespace TodoAPI.Filters
 
             if (todoItem == null) {
                 context.Result = new JsonResult(
-                    new GenericResponseModel {
+                    new ResponseModel {
                         Success = false,
-                        Message = "This item does not exist."
+                        Error = new ErrorModel {
+                            Message = "This item does not exist."
+                        }
                     }
                 ) {
                     StatusCode = 404
@@ -48,9 +50,11 @@ namespace TodoAPI.Filters
 
             if (userProject == null) {
                 context.Result = new JsonResult(
-                    new GenericResponseModel {
+                    new ResponseModel {
                         Success = false,
-                        Message = "The project doesn't exist or the current user doesn't have permission to access this project."
+                        Error = new ErrorModel {
+                            Message = "The project doesn't exist or the current user doesn't have permission to access this project."
+                        }
                     }
                 ) {
                     StatusCode = 400

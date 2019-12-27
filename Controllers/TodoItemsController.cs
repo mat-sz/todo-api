@@ -35,25 +35,29 @@ namespace TodoAPI.Controllers
                 .Include(tl => tl.TodoItems)
                 .SingleOrDefault(tl => tl.Id == model.TodoListId);
 
-            if (todoList == null)
-                return NotFound(new GenericResponseModel
-                    {
-                        Success = false,
+            if (todoList == null) {
+                return NotFound(new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
                         Message = "This item does not exist."
-                    });
+                    }
+                });
+            }
 
             var userProject = _context.UserProjects
                 .Include(up => up.Project)
                 .SingleOrDefault(up => up.ProjectId == todoList.ProjectId && up.UserId == user.Id);
 
-            if (userProject == null)
-                return BadRequest(new GenericResponseModel
-                    {
-                        Success = false,
+            if (userProject == null) {
+                return BadRequest(new ResponseModel {
+                    Success = false,
+                    Error = new ErrorModel {
                         Message = "The project doesn't exist or the current user doesn't have permission to access this project."
-                    });
+                    }
+                });
+            }
 
-            var item = new TodoItem{
+            var item = new TodoItem {
                 Name = model.Name,
                 Done = model.Done
             };
@@ -61,10 +65,9 @@ namespace TodoAPI.Controllers
             todoList.TodoItems.Add(item);
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
 
         [HttpGet("{id}")]
@@ -72,7 +75,10 @@ namespace TodoAPI.Controllers
         public IActionResult Get(int id)
         {
             TodoItem todoItem = (TodoItem)HttpContext.Items["todoItem"];
-            return Ok(todoItem);
+            return Ok(new ResponseModel {
+                Success = true,
+                Data = todoItem
+            });
         }
 
         [HttpPost("{id}")]
@@ -84,10 +90,9 @@ namespace TodoAPI.Controllers
             todoItem.Done = model.Done;
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
 
         [HttpDelete("{id}")]
@@ -98,10 +103,9 @@ namespace TodoAPI.Controllers
             _context.Remove(todoItem);
             _context.SaveChanges();
 
-            return Ok(new GenericResponseModel
-                {
-                    Success = true
-                });
+            return Ok(new ResponseModel {
+                Success = true
+            });
         }
     }
 }

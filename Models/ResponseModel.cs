@@ -2,11 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TodoAPI.Models
 {
-    public class AuthenticationResponseModel
+    public class ResponseModel
     {
         [Required]
         public bool Success { get; set; }
 
-        public string Token { get; set; }
+        public ErrorModel Error { get; set; }
+
+        public object Data { get; set; }
     }
 }
