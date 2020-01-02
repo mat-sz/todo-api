@@ -33,7 +33,9 @@ namespace TodoAPI.Controllers
             var user = _authService.GetUserFromIdentity(this.User.Identity);
             var userProjects = _context.UserProjects
                 .Include(up => up.Project)
-                .ThenInclude(p => p.TodoLists)
+                    .ThenInclude(p => p.TodoLists)
+                .Include(up => up.Project)
+                    .ThenInclude(p => p.Labels)
                 .Where(up => up.UserId == user.Id);
             
             return Ok(new ResponseModel {

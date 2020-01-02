@@ -12,6 +12,8 @@ namespace TodoAPI.Entities
 
         [JsonIgnore]
         public Project Project { get; set; }
+        
+        [JsonIgnore]
         public List<TodoItemLabel> TodoItemLabels { get; set; } = new List<TodoItemLabel>();
     }
 }
