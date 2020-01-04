@@ -9,7 +9,7 @@ using TodoAPI;
 namespace TodoAPI.Migrations
 {
     [DbContext(typeof(TodoContext))]
-    [Migration("20191226171410_AddLabels")]
+    [Migration("20200104163637_AddLabels")]
     partial class AddLabels
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,7 +37,7 @@ namespace TodoAPI.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Label");
+                    b.ToTable("Labels");
                 });
 
             modelBuilder.Entity("TodoAPI.Entities.Project", b =>
@@ -100,7 +100,7 @@ namespace TodoAPI.Migrations
 
                     b.HasIndex("LabelId");
 
-                    b.ToTable("TodoItemLabel");
+                    b.ToTable("TodoItemLabels");
                 });
 
             modelBuilder.Entity("TodoAPI.Entities.TodoList", b =>
@@ -178,7 +178,7 @@ namespace TodoAPI.Migrations
             modelBuilder.Entity("TodoAPI.Entities.Label", b =>
                 {
                     b.HasOne("TodoAPI.Entities.Project", "Project")
-                        .WithMany()
+                        .WithMany("Labels")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
